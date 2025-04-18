@@ -1,0 +1,121 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Trang Chủ - SendMessage{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <!-- Thông Tin Nền Tảng -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h3 class="text-secondary">Một Nền Tảng Để Kết Nối và Hợp Tác</h3>
+            <p class="text-muted">SendMessage cung cấp các công cụ mạnh mẽ cho việc giao tiếp nhóm, chia sẻ tệp và quản
+                lý thông tin công việc hiệu quả.</p>
+        </div>
+    </div>
+
+    <!-- Các Dịch Vụ Chính -->
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        <!-- Tin nhắn Card -->
+        <div class="col">
+            <div class="card shadow-lg border-light rounded-3">
+                <img src="https://res.cloudinary.com/dblzpkokm/image/upload/v1732437050/cld-sample-2.jpg"
+                     class="card-img-top" alt="Gửi Tin Nhắn">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">Gửi Tin Nhắn Ngay Lập Tức</h5>
+                    <p class="card-text">Gửi tin nhắn đến bạn bè và đồng nghiệp trong thời gian thực. Giữ liên lạc dễ
+                        dàng và nhanh chóng.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chia sẻ Tệp Card -->
+        <div class="col">
+            <div class="card shadow-lg border-light rounded-3">
+                <img src="https://res.cloudinary.com/dblzpkokm/image/upload/v1732437050/cld-sample.jpg"
+                     class="card-img-top" alt="Chia Sẻ Tệp">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Chia Sẻ Tệp Dễ Dàng</h5>
+                    <p class="card-text">Đính kèm và chia sẻ các tệp với bạn bè và đồng nghiệp một cách nhanh chóng và
+                        an toàn.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hợp tác Nhóm Card -->
+        <div class="col">
+            <div class="card shadow-lg border-light rounded-3">
+                <img src="https://res.cloudinary.com/dblzpkokm/image/upload/v1732437050/cld-sample-3.jpg"
+                     class="card-img-top" alt="Hợp Tác Nhóm">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">Hợp Tác Nhóm</h5>
+                    <p class="card-text">Tạo nhóm và chia sẻ thông tin trong các dự án, giúp công việc nhóm trở nên hiệu
+                        quả và liền mạch hơn.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Phần Đánh Giá Người Dùng -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <h3 class="mb-4 text-secondary">Nhận Xét Từ Người Dùng</h3>
+            <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+                <div class="carousel-inner">
+                    <!-- Nhận xét 1 -->
+                    <div class="carousel-item active">
+                        <div class="card shadow-lg border-light rounded-3">
+                            <div class="card-body text-center">
+                                <p class="lead">"SendMessage đã thay đổi cách chúng tôi làm việc. Nhanh chóng, an toàn
+                                    và dễ dàng kết nối với mọi người."</p>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nhận xét 2 -->
+                    <div class="carousel-item">
+                        <div class="card shadow-lg border-light rounded-3">
+                            <div class="card-body text-center">
+                                <p class="lead">"Chia sẻ tệp và gửi tin nhắn chưa bao giờ dễ dàng đến thế. Giao diện
+                                    người dùng rất trực quan và dễ sử dụng."</p>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Nhận xét 3 -->
+                    <div class="carousel-item">
+                        <div class="card shadow-lg border-light rounded-3">
+                            <div class="card-body text-center">
+                                <p class="lead">"SendMessage là công cụ không thể thiếu trong nhóm của chúng tôi."</p>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Các nút chuyển slide -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel"
+                        data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Trước</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel"
+                        data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Tiếp theo</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liên Hệ -->
+    <div class="row mt-5">
+        <div class="col-12 text-center">
+            <h3 class="text-primary">Liên Hệ Với Chúng Tôi</h3>
+            <p class="text-muted">Có bất kỳ câu hỏi nào? Hãy liên hệ với chúng tôi và chúng tôi sẽ giúp bạn.</p>
+            <a href="mailto:info@sendmessage.com" class="btn btn-outline-primary">Liên Hệ Ngay</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

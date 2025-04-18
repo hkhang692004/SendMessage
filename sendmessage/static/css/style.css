@@ -1,0 +1,123 @@
+/* static/css/style.css */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    padding: 10px;
+    font-size:25px;
+    text-decoration: none;
+    margin: 0 15px;
+}
+
+nav a:hover {
+    background-color: #555;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1, h2 {
+    color: white;
+}
+
+form input, form textarea, form button {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+}
+
+form input[type="text"], form input[type="password"], form input[type="email"], form textarea {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+form button:hover {
+    background-color: #45a049;
+}
+
+footer {
+    position: relative; /* Đảm bảo footer không bị cố định */
+    bottom: 0;
+    width: 100%;
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 20px 0;
+}
+
+/* Thêm vào file CSS của bạn */
+nav a:hover {
+    background-color: #007bff;
+    color: white;
+    transform: scale(1.05); /* Tạo hiệu ứng phóng to nhẹ khi hover */
+    transition: all 0.3s ease;
+}
+
+
+/* Gradient background */
+.bg-gradient {
+    background: linear-gradient(to right, #6a11cb, #2575fc);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Nền phủ mờ để văn bản nổi bật */
+.background-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgb(20, 107, 178); /* Nền tối mờ */
+    z-index: -1;
+}
+
+/* Hiệu ứng FadeIn cho tiêu đề và văn bản */
+.animated.fadeIn {
+    animation: fadeIn 1.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+/* Hiệu ứng hover cho các nút */
+nav .btn:hover {
+    transform: translateY(-5px);
+    transition: transform 0.3s ease;
+}

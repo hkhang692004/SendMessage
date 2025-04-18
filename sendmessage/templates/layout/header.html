@@ -1,0 +1,37 @@
+<header class="bg-gradient text-white p-4 text-center position-relative">
+    <div class="background-overlay"></div>
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container">
+        <a href="{{ url_for('home') }}">Trang chủ</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('messages') }}">Tin nhắn</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('logout') }}">Đăng Xuất</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a href="{{ url_for('register') }}">Đăng Ký</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ url_for('login') }}">Đăng Nhập</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+    <div class="hero-text text-center mt-5">
+        <h1 class="display-4 mb-3 animated fadeIn">Chào Mừng Đến Với SendMessage</h1>
+        <p class="lead mb-4 animated fadeIn">Nền tảng tuyệt vời để nhắn tin và chia sẻ tệp tin một cách nhanh chóng và an toàn!</p>
+    </div>
+</header>
