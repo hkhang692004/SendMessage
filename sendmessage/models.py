@@ -60,6 +60,10 @@ class Conversation(db.Model):
             return User.query.get(self.user2_id)  # Trả về đối tượng User đúng
         return User.query.get(self.user1_id)
     # Trả về ID của user1 (thay vì user1 trực tiếp)
+    def get_last_message(self):
+        """Lấy tin nhắn gần nhất trong cuộc trò chuyện"""
+        return Message.query.filter_by(conversation_id=self.id).order_by(Message.timestamp.desc()).first()
+
 
 
 class Message(db.Model):

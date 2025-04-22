@@ -38,6 +38,18 @@ h1, h2 {
 #h1message{
 color: #3C3A3A;
 }
+    .message-bubble {
+        position: relative;
+        padding: 10px 15px;
+        border-radius: 18px !important;
+        max-width: 100%;
+        word-wrap: break-word;
+    }
+
+
+    #chat-box {
+        scroll-behavior: smooth;
+    }
 
 
 form input, form textarea, form button {

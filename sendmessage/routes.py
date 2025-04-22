@@ -93,8 +93,14 @@ def messages():
     else:
         search_results = []
 
-    return render_template('messages.html', conversations=conversations, search_results=search_results,
-                           current_user=user)
+    return render_template(
+        'messages.html',
+        conversations=conversations,
+        search_results=search_results,
+        email_search=email_search,
+        current_user=user
+    )
+
 
 
 @app.route('/chat/<partner_email>', methods=['GET', 'POST'])

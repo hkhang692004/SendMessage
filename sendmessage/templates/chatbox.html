@@ -20,17 +20,39 @@
              data-partner-id="{{ partner.id }}"
              data-partner-name="{{ partner.name }}">
             {% for msg in messages %}
-            <div class="mb-3 {% if msg.sender_id == current_user.id %}text-end{% endif %}">
-                <p class="mb-1">
-                    <strong>{{ msg.sender.name }}</strong>
-                </p>
-                <div class="p-2 rounded {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %}">
-                    <p class="mb-1">{{ msg.content }}</p>
-                    {% if 'http' in msg.content and msg.content.endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
-                    <img src="{{ msg.content }}" class="img-fluid rounded mt-2" style="max-height: 300px;">
+            <div class="mb-3 {% if msg.sender_id == current_user.id %}d-flex justify-content-end{% endif %}">
+                {% if msg.sender_id != current_user.id %}
+                <img src="{{ msg.sender.avatar_url or url_for('static', filename='default-avatar.png') }}" alt="Avatar"
+                     class="rounded-circle me-2 align-self-end" width="30" height="30">
+                {% endif %}
+
+                <div style="max-width: 70%;">
+                    {% if msg.sender_id != current_user.id %}
+                    <small class="text-muted mb-1 d-block">{{ msg.sender.name }}</small>
                     {% endif %}
+
+                    <div class="message-bubble rounded-3 p-2 {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %}"
+                         style="border-radius: 18px; display: inline-block;">
+
+                        {% if msg.content.startswith('https://') and msg.content.endswith(('.jpg', '.jpeg', '.png',
+                        '.gif')) %}
+                        <!-- Hiển thị ảnh -->
+                        <img src="{{ msg.content }}" class="img-fluid rounded"
+                             style="max-width: 100%; max-height: 300px;">
+                        {% else %}
+                        <!-- Hiển thị text -->
+                        <p class="mb-0">{{ msg.content }}</p>
+                        {% endif %}
+                    </div>
+
+                    <small class="text-muted d-block mt-1">{{ msg.timestamp.strftime('%H:%M %d/%m/%Y') }}</small>
                 </div>
-                <small class="text-muted">{{ msg.timestamp.strftime('%H:%M %d/%m/%Y') }}</small>
+
+                {% if msg.sender_id == current_user.id %}
+                <img src="{{ current_user.avatar_url or url_for('static', filename='default-avatar.png') }}"
+                     alt="Avatar"
+                     class="rounded-circle ms-2 align-self-end" width="30" height="30">
+                {% endif %}
             </div>
             {% endfor %}
         </div>
@@ -42,7 +64,7 @@
                     <textarea name="content" class="form-control" rows="2" placeholder="Nhập tin nhắn..."></textarea>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <input type="file" name="file"  class="form-control w-50 me-2">
+                    <input type="file" name="file" class="form-control w-50 me-2">
                     <button type="submit" class="btn btn-success">Gửi</button>
                 </div>
             </form>
@@ -50,4 +72,3 @@
     </div>
 </div>
 {% endblock %}
-

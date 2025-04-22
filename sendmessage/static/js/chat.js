@@ -8,7 +8,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const conversationId = chatBox.dataset.conversationId;
     const senderId = parseInt(chatBox.dataset.senderId);
+    const partnerId = parseInt(chatBox.dataset.partnerId);
     const partnerName = chatBox.dataset.partnerName || "Đối phương";
+
+    // Lấy URL avatar của người dùng và đối tác
+    const currentUserAvatar = document.querySelector('.card-header').nextElementSibling.querySelector('img')?.src || '/static/default-avatar.png';
+    const partnerAvatar = document.querySelector('.card-header img')?.src || '/static/default-avatar.png';
 
     socket.emit('join', { room: conversationId });
 
@@ -22,24 +27,39 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Gửi file nếu có
         if (file) {
+            // Hiển thị thông báo đang tải
+            const loadingId = 'loading-' + Date.now();
+            appendLoadingMessage(loadingId);
+
             const formData = new FormData();
             formData.append("file", file);
 
-            const response = await fetch("/upload", {
-                method: "POST",
-                body: formData
-            });
+            try {
+                const response = await fetch("/upload", {
+                    method: "POST",
+                    body: formData
+                });
 
-            const data = await response.json();
-            const fileUrl = data.url;
+                const data = await response.json();
+                const fileUrl = data.url;
 
-            socket.emit("send_message", {
-                content: fileUrl,
-                sender_id: senderId,
-                conversation_id: conversationId
-            });
+                // Xóa thông báo đang tải
+                removeLoadingMessage(loadingId);
 
-            fileInput.value = "";
+                // Gửi URL file qua socket
+                socket.emit("send_message", {
+                    content: fileUrl,
+                    sender_id: senderId,
+                    conversation_id: conversationId
+                });
+
+                fileInput.value = "";
+            } catch (error) {
+                console.error("Lỗi khi tải file:", error);
+                // Xóa thông báo đang tải
+                removeLoadingMessage(loadingId);
+                alert("Lỗi khi tải file lên. Vui lòng thử lại!");
+            }
         }
 
         // Gửi nội dung văn bản nếu có
@@ -59,35 +79,85 @@ document.addEventListener("DOMContentLoaded", function () {
         appendMessage(data.content, data.sender_id, isSender ? 'Bạn' : partnerName, isSender);
     });
 
+    function appendLoadingMessage(id) {
+        const loadingHtml = `
+            <div id="${id}" class="mb-3 d-flex justify-content-end">
+                <div style="max-width: 70%;">
+                    <div class="message-bubble rounded-3 p-2 bg-primary text-white" style="border-radius: 18px;">
+                        <div class="d-flex align-items-center">
+                            <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                            <span>Đang tải file...</span>
+                        </div>
+                    </div>
+                </div>
+                <img src="${currentUserAvatar}" alt="Avatar" class="rounded-circle ms-2 align-self-end" width="30" height="30">
+            </div>
+        `;
+        chatBox.insertAdjacentHTML("beforeend", loadingHtml);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function removeLoadingMessage(id) {
+        const loadingElement = document.getElementById(id);
+        if (loadingElement) {
+            loadingElement.remove();
+        }
+    }
+
     function appendMessage(content, sender_id, senderName, isOwnMessage) {
-        let inner = "";
+        const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const currentDate = new Date().toLocaleDateString('vi-VN');
+        const avatar = isOwnMessage ? currentUserAvatar : partnerAvatar;
+
+        // Xác định loại nội dung và tạo HTML tương ứng
+        let contentHTML = "";
 
         // Nếu là ảnh
         if (content.includes('http') && /\.(jpg|jpeg|png|gif|webp)$/i.test(content)) {
-            inner = `<img src="${content}" class="img-fluid rounded mt-2" style="max-height: 300px;">`;
+            contentHTML = `<img src="${content}" class="img-fluid rounded" style="max-width: 100%; max-height: 300px;">`;
         }
-        // Nếu là file và có phần mở rộng như .doc, .cpp, .pdf
-        else if (content.includes('http') && /\.(docx?|cpp|pdf)$/i.test(content)) {
+        // Nếu là file có phần mở rộng
+        else if (content.includes('http') && /\.(docx?|xlsx?|pptx?|pdf|zip|rar|cpp|txt)$/i.test(content)) {
             const filename = decodeURIComponent(content.split('/').pop());
-            // Hiển thị tên file và cho phép tải hoặc mở file
-            inner = `
-                <a href="${content}" target="_blank" download>
-                    ${filename}
+            const fileExtension = filename.split('.').pop().toLowerCase();
+
+            // Chọn icon phù hợp với loại file
+            let fileIcon = 'fa-file';
+            if (['doc', 'docx'].includes(fileExtension)) fileIcon = 'fa-file-word';
+            else if (['xls', 'xlsx'].includes(fileExtension)) fileIcon = 'fa-file-excel';
+            else if (['ppt', 'pptx'].includes(fileExtension)) fileIcon = 'fa-file-powerpoint';
+            else if (fileExtension === 'pdf') fileIcon = 'fa-file-pdf';
+            else if (['zip', 'rar'].includes(fileExtension)) fileIcon = 'fa-file-archive';
+            else if (['cpp', 'txt', 'js', 'html', 'css'].includes(fileExtension)) fileIcon = 'fa-file-code';
+
+            contentHTML = `
+                <a href="${content}" target="_blank" class="d-flex align-items-center text-reset text-decoration-none">
+                    <i class="fas ${fileIcon} fa-2x me-2"></i>
+                    <span class="${isOwnMessage ? 'text-white' : ''}">${filename}</span>
                 </a>
             `;
         }
         // Nếu là text
         else {
-            inner = `<p class="mb-1">${content}</p>`;
+            contentHTML = `<p class="mb-0">${content}</p>`;
         }
 
+        // Tạo HTML cho tin nhắn theo kiểu Messenger
         const msgHtml = `
-            <div class="mb-3 ${isOwnMessage ? 'text-end' : ''}">
-                <p class="mb-1"><strong>${senderName}</strong></p>
-                <div class="p-2 rounded ${isOwnMessage ? 'bg-primary text-white' : 'bg-light'}">
-                    ${inner}
+            <div class="mb-3 ${isOwnMessage ? 'd-flex justify-content-end' : 'd-flex justify-content-start'}">
+                ${!isOwnMessage ? `<img src="${avatar}" alt="Avatar" class="rounded-circle me-2 align-self-end" width="30" height="30">` : ''}
+
+                <div style="max-width: 70%;">
+                    ${!isOwnMessage ? `<small class="text-muted mb-1 d-block">${senderName}</small>` : ''}
+
+                    <div class="message-bubble rounded-3 p-2 ${isOwnMessage ? 'bg-primary text-white' : 'bg-light'}" style="border-radius: 18px; display: inline-block;">
+                        ${contentHTML}
+                    </div>
+
+                    <small class="text-muted d-block mt-1">${currentTime} ${currentDate}</small>
                 </div>
-                <small class="text-muted">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</small>
+
+                ${isOwnMessage ? `<img src="${avatar}" alt="Avatar" class="rounded-circle ms-2 align-self-end" width="30" height="30">` : ''}
             </div>
         `;
 
@@ -96,4 +166,22 @@ document.addEventListener("DOMContentLoaded", function () {
             chatBox.scrollTop = chatBox.scrollHeight;
         });
     }
+
+    // Auto resize textarea khi nhập nội dung dài
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = (this.scrollHeight) + 'px';
+
+        // Giới hạn chiều cao tối đa
+        const maxHeight = 150;
+        if (this.scrollHeight > maxHeight) {
+            this.style.height = maxHeight + 'px';
+            this.style.overflowY = 'auto';
+        } else {
+            this.style.overflowY = 'hidden';
+        }
+    });
+
+    // Cuộn xuống cuối khi trang được tải
+    chatBox.scrollTop = chatBox.scrollHeight;
 });
