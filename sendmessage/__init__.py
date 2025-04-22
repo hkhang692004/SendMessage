@@ -1,14 +1,20 @@
+
+
+
 from flask import Flask
 from urllib.parse import quote
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import cloudinary
+from flask_socketio import SocketIO
+
+
 
 app = Flask(__name__)
 app.secret_key = 'HGHJAHA^&^&*AJAVAHJ*^&^&*%&*^GAFGFAG'
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='eventlet')
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/sendmessagedb?charset=utf8mb4" % quote(
-    'Admin@123')
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@127.0.0.1/sendmessagedb?charset=utf8mb4" % quote('Admin@123')
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 
 db = SQLAlchemy(app)

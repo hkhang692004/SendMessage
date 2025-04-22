@@ -6,17 +6,19 @@
 <div class="container mt-4">
     <div class="card shadow-lg">
         <div class="card-header d-flex align-items-center bg-primary text-white">
-            <!-- Nút quay lại chỉ chứa icon mà không có nền -->
             <a href="{{ url_for('messages') }}" class="text-white me-3">
-                <i class="fa fa-arrow-left"></i> <!-- Biểu tượng quay lại -->
+                <i class="fa fa-arrow-left"></i>
             </a>
-
             <img src="{{ partner.avatar_url or url_for('static', filename='default-avatar.png') }}" alt="Avatar"
                  class="rounded-circle me-3" width="50" height="50">
             <h5 class="mb-0">{{ partner.name }}</h5>
         </div>
 
-        <div class="card-body" style="height: 400px; overflow-y: scroll;" id="chat-box">
+        <div class="card-body" style="height: 400px; overflow-y: scroll;" id="chat-box"
+             data-conversation-id="{{ conversation.id }}"
+             data-sender-id="{{ current_user.id }}"
+             data-partner-id="{{ partner.id }}"
+             data-partner-name="{{ partner.name }}">
             {% for msg in messages %}
             <div class="mb-3 {% if msg.sender_id == current_user.id %}text-end{% endif %}">
                 <p class="mb-1">
@@ -24,7 +26,6 @@
                 </p>
                 <div class="p-2 rounded {% if msg.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %}">
                     <p class="mb-1">{{ msg.content }}</p>
-
                     {% if 'http' in msg.content and msg.content.endswith(('.jpg', '.jpeg', '.png', '.gif')) %}
                     <img src="{{ msg.content }}" class="img-fluid rounded mt-2" style="max-height: 300px;">
                     {% endif %}
@@ -35,23 +36,18 @@
         </div>
 
         <div class="card-footer">
-            <form action="{{ url_for('chat_with_partner', partner_email=partner.email) }}" method="POST"
-                  enctype="multipart/form-data">
+            <form id="chat-form" action="{{ url_for('chat_with_partner', partner_email=partner.email) }}"
+                  method="POST" enctype="multipart/form-data">
                 <div class="mb-2">
                     <textarea name="content" class="form-control" rows="2" placeholder="Nhập tin nhắn..."></textarea>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
-                    <input type="file" name="file" accept="image/*" class="form-control w-50 me-2">
+                    <input type="file" name="file"  class="form-control w-50 me-2">
                     <button type="submit" class="btn btn-success">Gửi</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
-
-<script>
-    // Tự động cuộn xuống dòng tin nhắn mới nhất
-    const chatBox = document.getElementById("chat-box");
-    chatBox.scrollTop = chatBox.scrollHeight;
-</script>
 {% endblock %}
+

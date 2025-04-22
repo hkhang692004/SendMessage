@@ -10,6 +10,12 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 {% if current_user.is_authenticated %}
+                    <li class="nav-item d-flex align-items-center">
+                        <div class="avatar-container me-2">
+                            <img src="{{ current_user.avatar_url }}" alt="Avatar" class="avatar-img rounded-circle" width="40" height="40">
+                        </div>
+                        <span class="nav-link">{{ current_user.name }}</span>
+                    </li>
                     <li class="nav-item">
                         <a href="{{ url_for('messages') }}">Tin nhắn</a>
                     </li>

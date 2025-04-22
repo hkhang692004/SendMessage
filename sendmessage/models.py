@@ -115,22 +115,22 @@ def create_message(conversation, sender, content):
 
 
 # Tạo dữ liệu giả trong cơ sở dữ liệu
-with app.app_context():
+# with app.app_context():
     # Xóa dữ liệu cũ và tạo lại bảng
-    db.drop_all()
-    db.create_all()
+    # db.drop_all()
+    # db.create_all()
 
     # Tạo người dùng
-    user1 = create_user("john_doe", "john@example.com", "password123", "John Doe")
-    user2 = create_user("jane_doe", "jane@example.com", "password123", "Jane Doe")
-    user3 = create_user("admin_user", "admin@example.com", "admin123", "Admin User")
-
-    # Tạo cuộc trò chuyện giữa người dùng 1 và người dùng 2
-    conversation1 = create_conversation(user1, user2)
-
-    # Tạo một số tin nhắn trong cuộc trò chuyện
-    create_message(conversation1, user1, "Hi Jane, how are you?")
-    create_message(conversation1, user2, "I'm good, John! How about you?")
-    create_message(conversation1, user1, "I'm doing great, thanks for asking!")
+    # user1 = create_user("john_doe", "john@example.com", "password123", "John Doe")
+    # user2 = create_user("jane_doe", "jane@example.com", "password123", "Jane Doe")
+    # user3 = create_user("admin_user", "admin@example.com", "admin123", "Admin User")
+    #
+    # # Tạo cuộc trò chuyện giữa người dùng 1 và người dùng 2
+    # conversation1 = create_conversation(user1, user2)
+    #
+    # # Tạo một số tin nhắn trong cuộc trò chuyện
+    # create_message(conversation1, user1, "Hi Jane, how are you?")
+    # create_message(conversation1, user2, "I'm good, John! How about you?")
+    # create_message(conversation1, user1, "I'm doing great, thanks for asking!")
 
 

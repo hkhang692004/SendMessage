@@ -11,6 +11,39 @@
                     <h3>Đăng Ký</h3>
                 </div>
                 <div class="card-body">
+                    <!-- Hiển thị thông báo SweetAlert nếu có -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            <script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    {% for category, message in messages %}
+                                        let icon = 'info';
+                                        let title = 'Thông Báo';
+
+                                        if ('{{ category }}' === 'success') {
+                                            icon = 'success';
+                                            title = 'Thành Công';
+                                        } else if ('{{ category }}' === 'error') {
+                                            icon = 'error';
+                                            title = 'Lỗi';
+                                        } else if ('{{ category }}' === 'info') {
+                                            icon = 'info';
+                                            title = 'Thông Báo';
+                                        }
+
+                                        Swal.fire({
+                                            icon: icon,
+                                            title: title,
+                                            text: '{{ message|safe }}',
+                                            timer: 3000,
+                                            showConfirmButton: false
+                                        });
+                                    {% endfor %}
+                                });
+                            </script>
+                        {% endif %}
+                    {% endwith %}
+
                     <form method="POST" enctype="multipart/form-data">
                         <div class="mb-3">
                             <label for="name" class="form-label">Họ và Tên</label>
@@ -44,4 +77,3 @@
     </div>
 </div>
 {% endblock %}
-

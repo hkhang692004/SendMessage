@@ -1,12 +1,19 @@
+import eventlet
+
+eventlet.monkey_patch()
+
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_login import current_user, login_required, login_user, logout_user
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import check_password_hash
-from sendmessage import db, app, dao, login_manager
-from models import User, Message, Attachment
+from sendmessage import db, app, dao, login_manager, socketio
+from models import User, Message, Attachment, Conversation
 import cloudinary.uploader
 import os
 from utils import upload_file
+from flask_login import login_required, current_user
+from datetime import datetime
+from flask_socketio import emit, join_room
 
 from sendmessage.dao import add_user
 
@@ -28,12 +35,12 @@ def register():
 
         # Kiểm tra nếu mật khẩu trùng khớp
         if password != confirm_password:
-            flash('Mật khẩu không khớp!', 'danger')
+            flash('Mật khẩu không khớp!', 'error')
             return redirect(url_for('register'))
 
         # Kiểm tra nếu username đã tồn tại
         if User.query.filter_by(username=username).first():
-            flash('Username đã tồn tại!', 'danger')
+            flash('Username đã tồn tại!', 'error')
             return redirect(url_for('register'))
 
         # Xử lý avatar
@@ -59,16 +66,18 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
+        if not username or not password:
+            flash("Vui lòng nhập đầy đủ tên người dùng và mật khẩu.", 'info')
+            return render_template('login.html')
+
         user = User.query.filter_by(username=username).first()
-        if user and user.check_password(password):
+        if user and check_password_hash(user.password, password):
             login_user(user)
-            session['user_id'] = user.id  # Lưu user_id vào session
-            flash('Login successful', 'success')
             return redirect(url_for('messages'))
         else:
-            flash('Invalid username or password', 'danger')
-
+            flash('Tên người dùng hoặc mật khẩu không đúng!', 'error')
     return render_template('login.html')
+
 
 
 @app.route('/messages', methods=['GET', 'POST'])
@@ -86,15 +95,6 @@ def messages():
 
     return render_template('messages.html', conversations=conversations, search_results=search_results,
                            current_user=user)
-
-
-from flask import render_template, request, redirect, url_for
-from flask_login import login_required, current_user
-from sendmessage import app, db
-from models import User, Conversation, Message
-from datetime import datetime
-import cloudinary.uploader  # Nếu bạn dùng Cloudinary để lưu file
-import os
 
 
 @app.route('/chat/<partner_email>', methods=['GET', 'POST'])
@@ -144,7 +144,8 @@ def chat_with_partner(partner_email):
     return render_template(
         'chatbox.html',
         partner=partner,
-        messages=messages
+        messages=messages,
+        conversation=conversation
     )
 
 
@@ -154,11 +155,82 @@ def logout():
     flash('Bạn đã đăng xuất', 'info')
     return redirect(url_for('login'))
 
+import cloudinary.uploader
+from flask import request, jsonify
+
+@app.route("/upload", methods=["POST"])
+@login_required
+def upload_file():
+    if 'file' not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({"error": "No selected file"}), 400
+
+    # Lưu lại tên file gốc
+    original_filename = file.filename
+
+    # Upload file lên Cloudinary
+    upload_result = cloudinary.uploader.upload(file, resource_type="auto")
+
+    return jsonify({
+        "url": upload_result['secure_url'],  # URL của file
+        "filename": original_filename  # Tên file gốc
+    })
+
+@app.route('/get_conversations', methods=['GET'])
+def get_conversations():
+    # Lấy danh sách cuộc trò chuyện từ cơ sở dữ liệu
+    conversations = Conversation.query.filter_by(user_id=current_user.id).all()
+    conversation_data = []
+
+    for conv in conversations:
+        partner = conv.get_partner(current_user.id)
+        conversation_data.append({
+            'id': conv.id,
+            'partner_name': partner.name,
+            'partner_email': partner.email,
+            'partner_avatar': partner.avatar_url or url_for('static', filename='default-avatar.png'),
+            'chat_url': url_for('chat_with_partner', partner_email=partner.email),
+        })
+
+    return jsonify(conversation_data)
+
+
+
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return dao.get_user_by_id(user_id)
 
 
+@socketio.on('join')
+def handle_join(data):
+    room = data['room']
+    join_room(room)
+
+
+@socketio.on('send_message')
+def handle_send_message(data):
+    content = data['content']
+    sender_id = data['sender_id']
+    conversation_id = data['conversation_id']
+
+    # Lưu vào CSDL
+    message = Message(content=content, sender_id=sender_id, conversation_id=conversation_id)
+    db.session.add(message)
+    db.session.commit()
+
+    # Sau đó phát lại tới người nhận
+    emit('receive_message', {
+        'content': content,
+        'sender_id': sender_id,
+        'timestamp': message.timestamp.strftime('%H:%M %d/%m/%Y')
+    }, room=str(conversation_id))
+
+
 if __name__ == "__main__":
-    app.run(debug=True)
+    socketio.run(app, debug=True)
