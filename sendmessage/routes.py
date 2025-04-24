@@ -1,9 +1,11 @@
-import uuid
 
 import eventlet
-from werkzeug.utils import secure_filename
-
 eventlet.monkey_patch()
+
+
+from werkzeug.utils import secure_filename
+import uuid
+
 
 from flask import Flask, render_template, request, redirect, url_for, flash, session, current_app, jsonify
 from flask_login import current_user, login_required, login_user, logout_user

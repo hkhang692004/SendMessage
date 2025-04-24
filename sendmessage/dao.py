@@ -1,5 +1,6 @@
 from models import User
 from models import User, db
+
 from werkzeug.security import generate_password_hash
 
 
