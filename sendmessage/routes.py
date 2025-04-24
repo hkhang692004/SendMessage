@@ -210,6 +210,8 @@ def send_message_with_file():
     sender_id = request.form.get("sender_id")
     conversation_id = request.form.get("conversation_id")
     content = request.form.get("content", "")
+    partner_id=request.form.get("partner_id")
+
 
     # Tạo message và giữ nguyên nội dung ban đầu
     message = Message(
@@ -303,7 +305,7 @@ def send_message_with_file():
         emit_data["file_size"] = file_size
 
     socketio.emit("receive_message", emit_data, room=conversation_id)
-
+    socketio.emit("new_conv", {'msg': 'new conversation'}, room=str(partner_id), namespace='/', to=str(partner_id))
     # Trả về kết quả
     return jsonify({
         "status": "success",
