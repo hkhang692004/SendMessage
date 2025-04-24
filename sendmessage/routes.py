@@ -465,5 +465,3 @@ def handle_send_message(data):
     emit("new_conv", {'msg': 'new conversation'}, room=str(partner_id), namespace='/', to=str(partner_id))
 
 
-if __name__ == "__main__":
-    socketio.run(app, debug=True)
