@@ -44,7 +44,9 @@
 {% endblock %}
 
 <!-- Global Scripts -->
+{% if current_user.is_authenticated %}
 <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endif %}
 <script src="https://unpkg.com/feather-icons"></script>
 
 {% block scripts %}{% endblock %}
