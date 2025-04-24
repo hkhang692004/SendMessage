@@ -34,6 +34,7 @@ socket.on("new_conv",()=>{updateConversations()})
             formData.append("file", file);
             formData.append("sender_id", senderId);
             formData.append("conversation_id", conversationId);
+            formData.append("partner_id",partnerId);
 
             // Nếu có nội dung kèm theo file
             if (content) {
