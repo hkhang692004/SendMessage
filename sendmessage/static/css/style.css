@@ -35,6 +35,22 @@ nav a:hover {
 h1, h2 {
     color: white;
 }
+#h1message{
+color: #3C3A3A;
+}
+    .message-bubble {
+        position: relative;
+        padding: 10px 15px;
+        border-radius: 18px !important;
+        max-width: 70%;
+        word-wrap: break-word;
+    }
+
+
+    #chat-box {
+        scroll-behavior: smooth;
+    }
+
 
 form input, form textarea, form button {
     display: block;
@@ -121,3 +137,32 @@ nav .btn:hover {
     transform: translateY(-5px);
     transition: transform 0.3s ease;
 }
+    .avatar-container {
+        width: 40px;
+        height: 40px;
+        overflow: hidden;
+        border-radius: 50%;
+        background-color: #333;
+         margin-bottom:10px;
+    }
+
+    .avatar-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+         margin-bottom:10px;
+    }
+
+.nav-link {
+    color: white; /* Đảm bảo màu chữ là trắng */
+    text-decoration: none; /* Bỏ gạch dưới mặc định của liên kết */
+    font-size: 18px;
+    margin-bottom:10px;
+}
+
+.nav-link:hover {
+    color: white; /* Giữ màu chữ trắng khi hover */
+    background-color: transparent; /* Không có nền khi hover */
+    text-decoration: none; /* Không có gạch dưới khi hover */
+}
+

@@ -6,6 +6,14 @@ from flask_login import UserMixin
 from sqlalchemy import Column, String, Integer, DateTime, ForeignKey, Boolean, Table, func
 from werkzeug.security import generate_password_hash, check_password_hash
 from sendmessage import db, app
+from datetime import datetime
+import pytz
+
+
+vn_tz = pytz.timezone('Asia/Ho_Chi_Minh')
+
+def get_vietnam_time():
+    return datetime.now(vn_tz)
 
 group_members = db.Table('group_members',
                          db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True),
@@ -60,6 +68,10 @@ class Conversation(db.Model):
             return User.query.get(self.user2_id)  # Trả về đối tượng User đúng
         return User.query.get(self.user1_id)
     # Trả về ID của user1 (thay vì user1 trực tiếp)
+    def get_last_message(self):
+        """Lấy tin nhắn gần nhất trong cuộc trò chuyện"""
+        return Message.query.filter_by(conversation_id=self.id).order_by(Message.timestamp.desc()).first()
+
 
 
 class Message(db.Model):
@@ -67,12 +79,12 @@ class Message(db.Model):
     conversation_id = Column(Integer, ForeignKey('conversation.id'), nullable=False)
     sender_id = Column(Integer, ForeignKey('user.id'), nullable=False)
     content = Column(String(500), nullable=False)
-    timestamp = Column(DateTime, default=func.now(), nullable=False)
+    timestamp = Column(DateTime, default=get_vietnam_time, nullable=False)
     is_read = Column(Boolean, default=False)
 
     # Quan hệ với người gửi tin nhắn
     sender = db.relationship('User', foreign_keys=[sender_id], backref='messages')
-
+    attachments = db.relationship('Attachment', backref='message', lazy=True)
 
 
 class Attachment(db.Model):
@@ -81,6 +93,11 @@ class Attachment(db.Model):
     file_url = Column(String(255), nullable=False)
     file_type = Column(String(50))
     file_size = Column(Integer)
+    original_filename = Column(String(255))  # Thêm trường lưu tên file gốc
+
+
+
+
 
 
 class Group(db.Model):
@@ -100,37 +117,20 @@ def create_user(username, email, password, name):
 
 
 # Hàm tạo cuộc trò chuyện giữa 2 người dùng
-def create_conversation(user1, user2):
-    conversation = Conversation(user1_id=user1.id, user2_id=user2.id)
-    db.session.add(conversation)
-    db.session.commit()
-    return conversation
 
 
-# Hàm tạo tin nhắn
-def create_message(conversation, sender, content):
-    message = Message(conversation_id=conversation.id, sender_id=sender.id, content=content)
-    db.session.add(message)
-    db.session.commit()
+if __name__ == '__main__':
+    with app.app_context():
+        # Xóa dữ liệu cũ và tạo lại bảng
+        db.drop_all()
+        db.create_all()
 
 
-# Tạo dữ liệu giả trong cơ sở dữ liệu
-with app.app_context():
-    # Xóa dữ liệu cũ và tạo lại bảng
-    db.drop_all()
-    db.create_all()
+        user1 = create_user("john_doe", "john@example.com", "password123", "John Doe")
+        user2 = create_user("jane_doe", "jane@example.com", "password123", "Jane Doe")
 
-    # Tạo người dùng
-    user1 = create_user("john_doe", "john@example.com", "password123", "John Doe")
-    user2 = create_user("jane_doe", "jane@example.com", "password123", "Jane Doe")
-    user3 = create_user("admin_user", "admin@example.com", "admin123", "Admin User")
 
-    # Tạo cuộc trò chuyện giữa người dùng 1 và người dùng 2
-    conversation1 = create_conversation(user1, user2)
 
-    # Tạo một số tin nhắn trong cuộc trò chuyện
-    create_message(conversation1, user1, "Hi Jane, how are you?")
-    create_message(conversation1, user2, "I'm good, John! How about you?")
-    create_message(conversation1, user1, "I'm doing great, thanks for asking!")
+
 
 

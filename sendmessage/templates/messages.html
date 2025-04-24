@@ -3,52 +3,107 @@
 {% block title %}Tin nhắn{% endblock %}
 
 {% block content %}
-<h1 class="text-center mb-4">Tin nhắn</h1>
+<h1 class="text-center mb-4" id="h1message">Tin nhắn</h1>
 
 <!-- Tìm kiếm bạn bè qua email -->
 <form action="{{ url_for('messages') }}" method="GET" class="w-50 mx-auto mb-4">
     <div class="mb-3">
         <label for="email_search" class="form-label">Tìm kiếm bạn bè (Email):</label>
-        <input type="email" id="email_search" name="email_search" class="form-control" placeholder="Nhập email để tìm kiếm...">
+        <input type="email" id="email_search" name="email_search" class="form-control" placeholder="Nhập email để tìm kiếm..." required>
     </div>
     <button type="submit" class="btn btn-secondary w-100">Tìm kiếm</button>
 </form>
 
 <!-- Danh sách cuộc trò chuyện -->
-{% if conversations %}
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+<div id="conversation-list-container">
+    {% if conversations %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 conversation-list">
         {% for conv in conversations %}
-            {% set partner = conv.get_partner(current_user.id) %}
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body d-flex align-items-center">
+        {% set partner = conv.get_partner(current_user.id) %}
+        {% set last_message = conv.get_last_message() %}
+        <div class="col" data-conversation-id="{{ conv.id }}">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex align-items-center mb-2">
                         <img src="{{ partner.avatar_url or url_for('static', filename='default-avatar.png') }}" alt="Avatar" class="rounded-circle me-3" width="50" height="50">
                         <div>
                             <h5 class="card-title mb-0">{{ partner.name }}</h5>
                             <p class="card-text text-muted small">{{ partner.email }}</p>
                         </div>
-                        <a href="{{ url_for('chat_with_partner', partner_email=partner.email) }}" class="stretched-link"></a>
                     </div>
+
+                    <!-- Tin nhắn gần nhất -->
+                    <div class="last-message mt-2 border-top pt-2">
+                        {% if last_message %}
+                            <div class="d-flex align-items-start">
+                                <div class="small text-truncate">
+                                    <span class="fw-bold me-1">
+                                        {% if last_message.sender_id == current_user.id %}
+                                            Bạn:
+                                        {% else %}
+                                            {{ partner.name.split()[0] }}:
+                                        {% endif %}
+                                    </span>
+                                    {{ last_message.content|truncate(50) }}
+                                </div>
+                                <small class="text-muted ms-auto" style="white-space: nowrap;">
+                                    {{ last_message.timestamp.strftime('%H:%M') }}
+                                </small>
+                            </div>
+                            <small class="text-muted">
+                                {{ last_message.timestamp.strftime('%d/%m/%Y') }}
+                            </small>
+                        {% else %}
+                            <p class="text-muted small mb-0">Chưa có tin nhắn</p>
+                        {% endif %}
+                    </div>
+
+                    <a href="{{ url_for('chat_with_partner', partner_email=partner.email) }}" class="stretched-link"></a>
                 </div>
             </div>
+        </div>
         {% endfor %}
     </div>
-{% else %}
+    {% else %}
     <h3 class="text-center">Chưa có cuộc trò chuyện nào</h3>
-{% endif %}
+    {% endif %}
+</div>
 
 <!-- Kết quả tìm kiếm -->
+{% if email_search %}
+<h3 class="mt-4">Kết quả tìm kiếm:</h3>
 {% if search_results %}
-    <h3 class="mt-4">Kết quả tìm kiếm:</h3>
-    <ul class="list-group">
-        {% for user in search_results %}
-            <li class="list-group-item d-flex align-items-center justify-content-between">
-                <div>
-                    <strong>{{ user.name }}</strong> – {{ user.email }}
-                </div>
-                <a href="{{ url_for('chat_with_partner', partner_email=user.email) }}" class="btn btn-primary btn-sm">Nhắn tin</a>
-            </li>
-        {% endfor %}
-    </ul>
+<ul class="list-group">
+    {% for user in search_results %}
+    <li class="list-group-item d-flex align-items-center justify-content-between">
+        <div>
+            <strong>{{ user.name }}</strong> – {{ user.email }}
+        </div>
+        <a href="{{ url_for('chat_with_partner', partner_email=user.email) }}" class="btn btn-primary btn-sm">Nhắn tin</a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p class="text-center text-muted">Không tìm thấy người dùng nào phù hợp với email đã nhập.</p>
 {% endif %}
+{% endif %}
+
+<!-- AJAX Script để tự động cập nhật danh sách cuộc trò chuyện -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+function updateConversations() {
+    $.ajax({
+        url: "{{ url_for('messages') }}",
+        method: "GET",
+        success: function(response) {
+            var newConversationList = $(response).find('#conversation-list-container').html();
+            $('#conversation-list-container').html(newConversationList);
+        },
+        error: function() {
+            console.log("Có lỗi xảy ra khi cập nhật danh sách cuộc trò chuyện.");
+        }
+    });
+}
+<!--setInterval(updateConversations, 10000); // 10 giây-->
+</script>
 {% endblock %}
